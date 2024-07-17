@@ -8,6 +8,7 @@ import net.vrakin.dto.Region;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @NoArgsConstructor
@@ -18,43 +19,20 @@ public class ApartmentDao implements Dao<Apartment> {
     private final RegionDao regionDao = new RegionDao();
 
     @Override
-    public Apartment save(Apartment apartment) {
+    public Apartment add(Apartment apartment) {
+        Long id = null;
 
-        String sqlQuery = null;
-        Apartment resultApartment = null;
-
-        if (apartment.getApartment_id() == null) {
-            sqlQuery = Apartment.INSERT_APARTMENT;
-        }else{
-            sqlQuery = Apartment.UPDATE_APARTMENT;
-        }
 
         try(Connection conn = dbConnector.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)){
+            PreparedStatement ps = conn.prepareStatement(Apartment.INSERT_APARTMENT,
+                    Statement.RETURN_GENERATED_KEYS)){
 
-            ps.setString(1, apartment.getAddress());
-            ps.setInt(2, apartment.getCapacity());
-            ps.setFloat(3, apartment.getPrice());
-            ps.setLong(4, apartment.getRegion().getRegionId());
-
+            setValueForPSWithoutID(apartment, ps);
             ps.executeUpdate();
 
-            if (apartment.getApartment_id() != null){
-                log.info("Apartment {} update successfully", apartment);
-                resultApartment = apartment;
-            }else {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    resultApartment = new Apartment();
-                    resultApartment.setApartment_id(rs.getLong(1));
-                    resultApartment.setAddress(apartment.getAddress());
-                    resultApartment.setCapacity(apartment.getCapacity());
-                    resultApartment.setPrice(apartment.getPrice());
-                    resultApartment.setRegion(apartment.getRegion());
-                    log.info("Apartment {} saved successfully", apartment);
-                } else {
-                    log.info("Apartment save failed");
-                }
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                id = rs.getLong(1);
             }
         }catch (SQLException e){
             e.printStackTrace();
@@ -63,7 +41,40 @@ public class ApartmentDao implements Dao<Apartment> {
             dbConnector.closeConnection();
         }
 
-        return resultApartment;
+        return getById(id);
+    }
+
+    @Override
+    public Apartment update(Apartment apartment) {
+        Long id = null;
+
+        if (!Objects.isNull(apartment.getApartmentId())) {
+            id = apartment.getApartmentId();
+        }else{
+            throw new IllegalArgumentException("apartment id is null");
+        }
+
+        try(Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.UPDATE_APARTMENT)){
+
+            setValueForPSWithoutID(apartment, ps);
+            ps.setLong(5, apartment.getApartmentId());
+            ps.executeUpdate();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+
+        return getById(id);
+    }
+
+    private static void setValueForPSWithoutID(Apartment apartment, PreparedStatement ps) throws SQLException {
+        ps.setString(1, apartment.getAddress());
+        ps.setInt(2, apartment.getCapacity());
+        ps.setFloat(3, apartment.getPrice());
+        ps.setLong(4, apartment.getRegion().getRegionId());
     }
 
     private List<Apartment> getByAllFields(Apartment apartment) {
@@ -134,8 +145,13 @@ public class ApartmentDao implements Dao<Apartment> {
             PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_ID);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
-            Apartment apartment = getApartment(rs);
+            Apartment apartment = new Apartment();
 
+            if (rs.next()) {
+                apartment = getApartment(rs);
+            }else {
+                throw new SQLException("Apartment not found. Id is null");
+            }
             log.info("Apartment found with id {}", id);
 
             return apartment;
@@ -150,7 +166,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
     private Apartment getApartment(ResultSet rs) throws SQLException {
 
-        Long regionID = rs.getLong("region_id");
+        Long regionID = rs.getLong(1);
 
         Region region = regionDao.getById(regionID);
 
@@ -164,27 +180,26 @@ public class ApartmentDao implements Dao<Apartment> {
 
     @Override
     public List<Apartment> getAll() {
+
+        List<Apartment> apartments = new ArrayList<>();
         try{
             Connection conn = dbConnector.getConnection();
             PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT);
             ResultSet rs = ps.executeQuery();
 
-            List<Apartment> apartments = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 Apartment apartment = getApartment(rs);
                 apartments.add(apartment);
             }
 
             log.info("Show {} of apartments", rs.getRow());
-
-            return apartments;
         }catch (SQLException e){
             e.printStackTrace();
         }
         finally {
             dbConnector.closeConnection();
         }
-        return null;
+        return apartments;
     }
 
     @Override

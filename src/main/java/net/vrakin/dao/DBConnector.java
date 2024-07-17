@@ -1,15 +1,12 @@
 package net.vrakin.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import net.vrakin.dto.Apartment;
-import net.vrakin.dto.Region;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 @Slf4j

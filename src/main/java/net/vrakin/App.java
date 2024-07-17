@@ -21,14 +21,9 @@ import java.util.Scanner;
 @Slf4j
 public class App 
 {
-    // CREATE DATABASE mydb;
-    static final String DB_CONNECTION = "jdbc:mysql://localhost:3306/mydb?serverTimezone=Europe/Kiev";
-    static final String DB_USER = "root";
-    static final String DB_PASSWORD = "mysqlrooTRootmysql11111!!!";
 
     static Connection conn;
 
-    //    public static final DBConnector dbConnector = new DBConnector(DB_CONNECTION, DB_USER, DB_PASSWORD);
     private static final RegionDao regionDao = new RegionDao();;
     private static final ApartmentDao apartmentDao = new ApartmentDao();
 

@@ -8,6 +8,7 @@ import net.vrakin.dto.Region;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class RegionDao implements Dao<Region> {
     public final DBConnector dbConnector = new DBConnector();
 
     @Override
-    public Region save(Region region) {
+    public Region add(Region region) {
 
         Region resultRegion = region;
         try{
@@ -58,6 +59,11 @@ public class RegionDao implements Dao<Region> {
     }
 
     @Override
+    public Apartment update(Apartment apartment) {
+        return null;
+    }
+
+    @Override
     public Region getById(Long id) {
         try{
             Connection conn = dbConnector.getConnection();
@@ -79,9 +85,13 @@ public class RegionDao implements Dao<Region> {
     }
 
     private static Region getRegion(ResultSet rs) throws SQLException {
-        return new Region(
-                rs.getLong(Region.ID),
-                rs.getString(Region.NAME));
+        if (rs.next()) {
+            Region region = new Region(rs.getLong(Region.ID),
+                    rs.getString(Region.NAME));
+            return region;
+        }else {
+            throw new SQLException("Region not found");
+        }
     }
 
     @Override
@@ -93,10 +103,11 @@ public class RegionDao implements Dao<Region> {
             PreparedStatement ps = conn.prepareStatement(Region.SELECT_REGION);
             ResultSet rs = ps.executeQuery();
 
-
-            while(rs.next()) {
-                Region region = getRegion(rs);
-                regions.add(region);
+            if (rs.getRow()>0) {
+                while (rs.next()) {
+                    Region region = getRegion(rs);
+                    regions.add(region);
+                }
             }
 
             log.info("Show {} of regions", rs.getRow());

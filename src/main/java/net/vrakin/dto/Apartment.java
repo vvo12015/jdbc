@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Apartment {
-    private Long apartment_id;
+    private Long apartmentId;
     private Region region;
     private String address;
     private Integer capacity;
@@ -20,7 +20,7 @@ public class Apartment {
 
     public static final String TABLE_NAME = "APARTMENT";
     public static final String ID = "APARTMENT_ID";
-    public static final String ADDRESS = "`ADDRESS`";
+    public static final String ADDRESS = "ADDRESS";
     public static final String CAPACITY = "CAPACITY";
     public static final String PRICE = "PRICE";
     public static final String REGION_REF = "REGION_REF";
@@ -48,7 +48,8 @@ public class Apartment {
             + ADDRESS + " = ?, "
             + CAPACITY + " = ?, "
             + PRICE + " = ?, "
-            + REGION_REF + " = ?, ";
+            + REGION_REF + " = ?" +
+            " WHERE " + ID + " = ?";
 
     public static final String SELECT_APARTMENT_BY_ID = "SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?";
 
