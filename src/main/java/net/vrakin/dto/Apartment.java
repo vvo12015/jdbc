@@ -12,11 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Apartment {
+
     private Long apartmentId;
+
     private Region region;
     private String address;
     private Integer capacity;
     private Float price;
+
+    public Apartment(Region region, String address, Integer capacity, Float price) {
+        this.region = region;
+        this.address = address;
+        this.capacity = capacity;
+        this.price = price;
+    }
 
     public static final String TABLE_NAME = "APARTMENT";
     public static final String ID = "APARTMENT_ID";

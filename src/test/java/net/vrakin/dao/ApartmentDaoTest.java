@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.vrakin.dto.Apartment;
 import net.vrakin.dto.Region;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
@@ -15,8 +17,9 @@ public class ApartmentDaoTest {
     private final static RegionDao regionDao = new RegionDao();
     public static final int TEST_SHIFT_CAPACITY = 1;
 
-    static{
-            apartmentDao.createTable();
+    @Before
+    public void setUp() throws Exception {
+        apartmentDao.createTable();
     }
 
 

@@ -13,6 +13,10 @@ public class Region {
     private Long regionId;
     private String name;
 
+    public Region(String name) {
+        this.name = name;
+    }
+
     public static final String TABLE_NAME = "REGION";
     public static final String ID = "REGION_ID";
     public static final String NAME = "NAME";

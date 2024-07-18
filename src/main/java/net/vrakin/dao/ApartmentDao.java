@@ -233,4 +233,6 @@ public class ApartmentDao implements Dao<Apartment> {
             dbConnector.closeConnection();
         }
     }
+
+
 }
