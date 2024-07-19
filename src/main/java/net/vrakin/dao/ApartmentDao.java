@@ -7,6 +7,7 @@ import net.vrakin.dto.Region;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +15,25 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ApartmentDao implements Dao<Apartment> {
 
+    public static final int COLUMN_INDEX_UPDATE_ID = 5;
+    public static final int COLUMN_INDEX_ID = 1;
+    public static final int COLUMN_INDEX_CAPACITY = 2;
+    public static final int COLUMN_INDEX_PRICE = 3;
+    public static final int COLUMN_INDEX_REGION = 4;
+    public static final int PARAMETER_INDEX_ADDRESS_BY_ADDRESS = 1;
+    public static final int PARAMETER_INDEX_ADDRESS_BY_ADDRESS_REGION = 2;
+    public static final int PARAMETER_INDEX_REGION_REF = 1;
+    public static final int PARAMETER_INDEX_PRICE_START_BY_REGION = 2;
+    public static final int PARAMETER_INDEX_PRICE_END_BY_REGION = 3;
+    public static final int PARAMETER_INDEX_CAPACITY_START_BY_CAPACITY_PRICE = 1;
+    public static final int PARAMETER_INDEX_CAPACITY_END_BY_CAPACITY_PRICE = 2;
+    public static final int PARAMETER_INDEX_PRICE_START_BY_CAPACITY_PRICE = 3;
+    public static final int PARAMETER_INDEX_PRICE_END_BY_CAPACITY_PRICE = 4;
+    public static final int PARAMETER_INDEX_REGION_REGION_BY_CAPACITY_PRICE = 1;
+    public static final int PARAMETER_INDEX_CAPACITY_START_BY_REGION_CAPACITY_PRICE = 2;
+    public static final int PARAMETER_INDEX_CAPACITY_END_BY_REGION_CAPACITY_PRICE = 3;
+    public static final int PARAMETER_INDEX_PRICE_START_BY_REGION_CAPACITY_PRICE = 4;
+    public static final int PARAMETER_INDEX_PRICE_END_BY_REGION_CAPACITY_PRICE = 5;
     public final DBConnector dbConnector = new DBConnector();
 
     private final RegionDao regionDao = new RegionDao();
@@ -32,8 +52,9 @@ public class ApartmentDao implements Dao<Apartment> {
 
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
-                id = rs.getLong(1);
+                id = rs.getLong("GENERATED_KEY");
             }
+
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -58,7 +79,7 @@ public class ApartmentDao implements Dao<Apartment> {
             PreparedStatement ps = conn.prepareStatement(Apartment.UPDATE_APARTMENT)){
 
             setValueForPSWithoutID(apartment, ps);
-            ps.setLong(5, apartment.getApartmentId());
+            ps.setLong(COLUMN_INDEX_UPDATE_ID, apartment.getApartmentId());
             ps.executeUpdate();
         }catch (SQLException e){
             e.printStackTrace();
@@ -71,71 +92,10 @@ public class ApartmentDao implements Dao<Apartment> {
     }
 
     private static void setValueForPSWithoutID(Apartment apartment, PreparedStatement ps) throws SQLException {
-        ps.setString(1, apartment.getAddress());
-        ps.setInt(2, apartment.getCapacity());
-        ps.setFloat(3, apartment.getPrice());
-        ps.setLong(4, apartment.getRegion().getRegionId());
-    }
-
-    private List<Apartment> getByAllFields(Apartment apartment) {
-
-        StringBuilder sql = getSQL_Query(apartment);
-
-        log.info(sql.toString());
-        List<Apartment> apartments = new ArrayList<>();
-
-        try{
-            Connection conn = dbConnector.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql.toString());
-            ResultSet rs = ps.executeQuery();
-
-
-            while(rs.next()) {
-                Apartment apartmentNext = getApartment(rs);
-                apartments.add(apartmentNext);
-            }
-
-            log.info("Show {} apartment ", apartments.size());
-
-            if(!apartments.isEmpty()){
-                log.info("Show apartment by all fields first apartment{}", apartments.get(0).toString());
-            };
-
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-        finally {
-            dbConnector.closeConnection();
-        }
-        return apartments;
-    }
-
-    private static StringBuilder getSQL_Query(Apartment apartment) {
-        StringBuilder sql = new StringBuilder();
-        sql.append(Apartment.SELECT_BY_ALL_PARAMETERS);
-
-        if (apartment.getRegion() != null) {
-            sql.append(String.format("%s = ?", Apartment.REGION_REF));
-        }
-
-        if (apartment.getAddress() != null) {
-            if (apartment.getRegion() != null) {sql.append(" AND ");}
-            sql.append(String.format("%s = ?", Apartment.ADDRESS));
-        }
-
-        if (apartment.getCapacity() != null) {
-            if ((apartment.getRegion() != null) ||
-                    (apartment.getAddress() != null)){sql.append(" AND ");}
-            sql.append(String.format("%s = ? ", Apartment.CAPACITY));
-        }
-
-        if (apartment.getPrice() != null) {
-            if ((apartment.getRegion() != null) ||
-                    (apartment.getAddress() != null) ||
-                    (apartment.getCapacity() != null) ){sql.append(" AND ");}
-            sql.append(String.format("%s = ? ", Apartment.PRICE));
-        }
-        return sql;
+        ps.setString(COLUMN_INDEX_ID, apartment.getAddress());
+        ps.setInt(COLUMN_INDEX_CAPACITY, apartment.getCapacity());
+        ps.setFloat(COLUMN_INDEX_PRICE, apartment.getPrice());
+        ps.setLong(COLUMN_INDEX_REGION, apartment.getRegion().getRegionId());
     }
 
     @Override
@@ -143,7 +103,7 @@ public class ApartmentDao implements Dao<Apartment> {
         try{
             Connection conn = dbConnector.getConnection();
             PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_ID);
-            ps.setLong(1, id);
+            ps.setLong(COLUMN_INDEX_ID, id);
             ResultSet rs = ps.executeQuery();
             Apartment apartment = new Apartment();
 
@@ -166,7 +126,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
     private Apartment getApartment(ResultSet rs) throws SQLException {
 
-        Long regionID = rs.getLong(1);
+        Long regionID = rs.getLong(Apartment.REGION_REF);
 
         Region region = regionDao.getById(regionID);
 
@@ -234,5 +194,163 @@ public class ApartmentDao implements Dao<Apartment> {
         }
     }
 
+    public List<Apartment> selectByAddress(String address){
 
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_ADDRESS);
+            ps.setString(PARAMETER_INDEX_ADDRESS_BY_ADDRESS, address);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
+
+    public List<Apartment> selectByRegion(Region region){
+
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_ADDRESS);
+            ps.setLong(PARAMETER_INDEX_REGION_REF, region.getRegionId());
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
+
+    public List<Apartment> selectByRegionAndAddress(Region region, String address){
+
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_REGION_AND_ADDRESS);
+            ps.setLong(PARAMETER_INDEX_REGION_REF, region.getRegionId());
+            ps.setString(PARAMETER_INDEX_ADDRESS_BY_ADDRESS_REGION, address);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
+
+    public List<Apartment> selectByRegionPriceBetween(Region region, float startPrice, float endPrice) {
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_REGION_AND_PRICE_BETWEEN);
+            ps.setLong(PARAMETER_INDEX_REGION_REF, region.getRegionId());
+            ps.setFloat(PARAMETER_INDEX_PRICE_START_BY_REGION, startPrice);
+            ps.setFloat(PARAMETER_INDEX_PRICE_END_BY_REGION, endPrice);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
+
+    public List<Apartment> selectByCapacityBetweenPriceBetween(int startCapacity, int endCapacity,
+                                                               float startPrice, float endPrice) {
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_CAPACITY_BETWEEN_PRICE_BETWEEN);
+            ps.setInt(PARAMETER_INDEX_CAPACITY_START_BY_CAPACITY_PRICE, startCapacity);
+            ps.setInt(PARAMETER_INDEX_CAPACITY_END_BY_CAPACITY_PRICE, endCapacity);
+            ps.setFloat(PARAMETER_INDEX_PRICE_START_BY_CAPACITY_PRICE, startPrice);
+            ps.setFloat(PARAMETER_INDEX_PRICE_END_BY_CAPACITY_PRICE, endPrice);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
+
+    public List<Apartment> selectByRegionCapacityBetweenPriceBetween(Region region, int startCapacity, int endCapacity,
+                                                                     float startPrice, float endPrice) {
+        List<Apartment> apartments = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Apartment.SELECT_APARTMENT_BY_REGION_CAPACITY_BETWEEN_PRICE_BETWEEN);
+
+            ps.setLong(PARAMETER_INDEX_REGION_REGION_BY_CAPACITY_PRICE, region.getRegionId());
+            ps.setInt(PARAMETER_INDEX_CAPACITY_START_BY_REGION_CAPACITY_PRICE, startCapacity);
+            ps.setInt(PARAMETER_INDEX_CAPACITY_END_BY_REGION_CAPACITY_PRICE, endCapacity);
+            ps.setFloat(PARAMETER_INDEX_PRICE_START_BY_REGION_CAPACITY_PRICE, startPrice);
+            ps.setFloat(PARAMETER_INDEX_PRICE_END_BY_REGION_CAPACITY_PRICE, endPrice);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Apartment apartment = getApartment(rs);
+                apartments.add(apartment);
+                log.info("Apartment with id {} deleted successfully", apartment.getApartmentId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return apartments;
+    }
 }

@@ -1,9 +1,6 @@
 package net.vrakin.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -11,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Apartment {
 
     private Long apartmentId;
@@ -65,22 +63,22 @@ public class Apartment {
     public static final String SELECT_BY_ALL_PARAMETERS = "SELECT * FROM " + TABLE_NAME + " WHERE ";
 
     public static final String SELECT_APARTMENT_BY_ADDRESS =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + ADDRESS + " = ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + ADDRESS + " = ?";//+
 
     public static final String SELECT_APARTMENT_BY_REGION =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?";//+
 
     public static final String SELECT_APARTMENT_BY_REGION_AND_ADDRESS =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?" + " AND " + ADDRESS + " = ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?" + " AND " + ADDRESS + " = ?";//+
 
     public static final String SELECT_APARTMENT_BY_REGION_AND_PRICE_BETWEEN =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?" + " AND " + PRICE + " BETWEEN ? AND ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ?" + " AND " + PRICE + " BETWEEN ? AND ?";//+
 
     public static final String SELECT_APARTMENT_BY_CAPACITY_BETWEEN_PRICE_BETWEEN =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + CAPACITY + " BETWEEN ? AND ? " + " AND " + PRICE + "BETWEEN ? AND ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + CAPACITY + " BETWEEN ? AND ?" + " AND " + PRICE + " BETWEEN ? AND ?";//+
 
     public static final String SELECT_APARTMENT_BY_REGION_CAPACITY_BETWEEN_PRICE_BETWEEN =
-            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ? AND " + CAPACITY + " BETWEEN ? AND ? " + " AND " + PRICE + " BETWEEN ? AND ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE " + REGION_REF + " = ? AND " + CAPACITY + " BETWEEN ? AND ? " + "AND " + PRICE + " BETWEEN ? AND ?";//+
 
     public static final String SELECT_APARTMENT = "SELECT * FROM " + TABLE_NAME;
 

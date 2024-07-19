@@ -8,12 +8,19 @@ import net.vrakin.dto.Region;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @NoArgsConstructor
 public class RegionDao implements Dao<Region> {
 
+    public static final int COLUMN_INDEX_REGION_ID = 1;
+    public static final int COLUMN_INDEX_NAME_INSERT = 1;
+
+
+    public static final int EMPTY_VALUE = 0;
+    public static final int COLUMN_INDEX_NAME_UPDATE = 1;
+    public static final int COLUMN_INDEX_ID_UPDATE = 2;
+    public static final int PARAMETER_INDEX_NAME_BY_NAME = 1;
     public final DBConnector dbConnector = new DBConnector();
 
     @Override
@@ -28,12 +35,12 @@ public class RegionDao implements Dao<Region> {
             if (region.getRegionId() == null) {
                 sqlQuery = Region.INSERT_REGION;
                 ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, region.getName());
+                ps.setString(COLUMN_INDEX_NAME_INSERT, region.getName());
             }else{
                 sqlQuery = Region.UPDATE_REGION;
                 ps = conn.prepareStatement(sqlQuery);
-                ps.setString(1, region.getName());
-                ps.setInt(2, Math.toIntExact(region.getRegionId()));
+                ps.setString(COLUMN_INDEX_NAME_UPDATE, region.getName());
+                ps.setInt(COLUMN_INDEX_ID_UPDATE, Math.toIntExact(region.getRegionId()));
             }
 
             long resultQuery = ps.executeUpdate();
@@ -42,7 +49,7 @@ public class RegionDao implements Dao<Region> {
             if (region.getRegionId() == null) {
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) {
-                    long id = rs.getLong(1);
+                    long id = rs.getLong("GENERATED_KEY");
                     resultRegion.setRegionId(id);
                 }
                 log.info("Region saved successfully");
@@ -68,9 +75,12 @@ public class RegionDao implements Dao<Region> {
         try{
             Connection conn = dbConnector.getConnection();
             PreparedStatement ps = conn.prepareStatement(Region.SELECT_REGION_BY_ID);
-            ps.setLong(1, id);
+            ps.setLong(COLUMN_INDEX_REGION_ID, id);
             ResultSet rs = ps.executeQuery();
-            Region region = getRegion(rs);
+            Region region = null;
+            if (rs.next()) {
+                region = getRegion(rs);
+            }
 
             log.info("Region found with id {}", id);
 
@@ -85,13 +95,9 @@ public class RegionDao implements Dao<Region> {
     }
 
     private static Region getRegion(ResultSet rs) throws SQLException {
-        if (rs.next()) {
-            Region region = new Region(rs.getLong(Region.ID),
-                    rs.getString(Region.NAME));
-            return region;
-        }else {
-            throw new SQLException("Region not found");
-        }
+        Region region = new Region(rs.getLong(COLUMN_INDEX_REGION_ID),
+                rs.getString(Region.NAME));
+        return region;
     }
 
     @Override
@@ -103,11 +109,9 @@ public class RegionDao implements Dao<Region> {
             PreparedStatement ps = conn.prepareStatement(Region.SELECT_REGION);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.getRow()>0) {
-                while (rs.next()) {
-                    Region region = getRegion(rs);
-                    regions.add(region);
-                }
+            while (rs.next()) {
+                Region region = getRegion(rs);
+                regions.add(region);
             }
 
             log.info("Show {} of regions", rs.getRow());
@@ -125,7 +129,7 @@ public class RegionDao implements Dao<Region> {
         try{
             Connection conn = dbConnector.getConnection();
             PreparedStatement ps = conn.prepareStatement(Region.DELETE_REGION);
-            ps.setLong(1, id);
+            ps.setLong(COLUMN_INDEX_REGION_ID, id);
             ps.executeUpdate();
 
             log.info("Region with id {} deleted successfully", id);
@@ -149,4 +153,30 @@ public class RegionDao implements Dao<Region> {
             dbConnector.closeConnection();
         }
     }
+
+    public List<Region> selectByName(String name){
+
+        List<Region> regions = new ArrayList<>();
+        try{
+            Connection conn = dbConnector.getConnection();
+            PreparedStatement ps = conn.prepareStatement(Region.SELECT_REGION_BY_NAME);
+            ps.setString(PARAMETER_INDEX_NAME_BY_NAME, name);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Region region = getRegion(rs);
+                regions.add(region);
+                log.info("Apartment with id {} deleted successfully", region.getRegionId().toString());
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            dbConnector.closeConnection();
+        }
+        return regions;
+    }
+
 }

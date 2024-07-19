@@ -44,7 +44,7 @@ public class DBConnector {
     public Connection getConnection() throws SQLException {
         if(conn == null || conn.isClosed()) {
             this.conn = DriverManager.getConnection(url, user, password);
-            log.info("Connection successful");
+            log.info("Opened connection successful");
         }
 
         return this.conn;
@@ -61,4 +61,6 @@ public class DBConnector {
             throw new RuntimeException(e);
         }
     }
+
+
 }

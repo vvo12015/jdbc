@@ -5,7 +5,6 @@ import net.vrakin.dto.Apartment;
 import net.vrakin.dto.Region;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
