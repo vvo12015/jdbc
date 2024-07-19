@@ -1,6 +1,7 @@
 package net.vrakin.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,13 +29,13 @@ public class DBConnector {
             this.user = props.getProperty("db.user");
             this.password = props.getProperty("db.password");
         }catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(ExceptionUtils.getStackTrace(e));
         }finally {
             if(in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    log.error(ExceptionUtils.getStackTrace(e));
                     throw new RuntimeException(e);
                 }
             }
@@ -57,7 +58,7 @@ public class DBConnector {
             }
             log.info("Connection closed successful");
         } catch (SQLException e) {
-            log.error(e.toString());
+            log.error(ExceptionUtils.getStackTrace(e));
             throw new RuntimeException(e);
         }
     }

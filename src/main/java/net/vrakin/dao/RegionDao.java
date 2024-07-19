@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.vrakin.dto.Apartment;
 import net.vrakin.dto.Region;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class RegionDao implements Dao<Region> {
                 log.info("Region save failed");
             }
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -86,7 +87,7 @@ public class RegionDao implements Dao<Region> {
 
             return region;
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -116,7 +117,7 @@ public class RegionDao implements Dao<Region> {
 
             log.info("Show {} of regions", rs.getRow());
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -134,7 +135,7 @@ public class RegionDao implements Dao<Region> {
 
             log.info("Region with id {} deleted successfully", id);
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -147,7 +148,7 @@ public class RegionDao implements Dao<Region> {
             stmt.execute(Region.DROP_TABLE);
             stmt.execute(Region.CREATE_TABLE);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
             throw new RuntimeException(e);
         }finally {
             dbConnector.closeConnection();
@@ -171,7 +172,7 @@ public class RegionDao implements Dao<Region> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();

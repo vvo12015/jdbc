@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.vrakin.dto.Apartment;
 import net.vrakin.dto.Region;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class ApartmentDao implements Dao<Apartment> {
             }
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -82,7 +83,7 @@ public class ApartmentDao implements Dao<Apartment> {
             ps.setLong(COLUMN_INDEX_UPDATE_ID, apartment.getApartmentId());
             ps.executeUpdate();
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -116,7 +117,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
             return apartment;
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -154,7 +155,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
             log.info("Show {} of apartments", rs.getRow());
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -172,7 +173,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
             log.info("Apartment with id {} deleted successfully", id);
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -187,8 +188,7 @@ public class ApartmentDao implements Dao<Apartment> {
             stmt.execute(Region.CREATE_TABLE);
             stmt.execute(Apartment.CREATE_TABLE);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            log.error(ExceptionUtils.getStackTrace(e));
         }finally {
             dbConnector.closeConnection();
         }
@@ -211,7 +211,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -236,7 +236,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -262,7 +262,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -288,7 +288,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -316,7 +316,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
@@ -346,7 +346,7 @@ public class ApartmentDao implements Dao<Apartment> {
 
 
         }catch (SQLException e){
-            e.printStackTrace();
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         finally {
             dbConnector.closeConnection();
